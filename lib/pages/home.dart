@@ -20,7 +20,7 @@ class _HomeState extends State<Home> {
         children: <Widget>[
           new Container(
             child: new RaisedButton(
-              child: new Text("ENTRY/प्रवेश",style: new TextStyle(color: Colors.white,fontSize: 30.0),),
+              child: new Text("ENTRY/ प्रवेश",style: new TextStyle(color: Colors.white,fontSize: 30.0),),
               onPressed: (){
                 Navigator.of(context).push(new MaterialPageRoute(
                 builder: ((BuildContext context){
@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
           new Padding(padding: EdgeInsets.only(top: 50.0),),
           new Container(
             child: new RaisedButton(
-              child: new Text("MESSAGES/संदेश",style: new TextStyle(color: Colors.white,fontSize: 30.0),),
+              child: new Text("MESSAGES/ संदेश",style: new TextStyle(color: Colors.white,fontSize: 30.0),),
               onPressed: (){
                 Navigator.of(context).push(new MaterialPageRoute(
                 builder: ((BuildContext context){

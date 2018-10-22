@@ -16,8 +16,6 @@ String vname;
 class _DetailState extends State<Detail> {
   final formKey = new GlobalKey<FormState>();
   String _name,_housenumber,_purpose,_error;
-  bool load = false ;
-  bool found=false ;
   DocumentReference documentReference ;
   bool phone_exist_check(){
     documentReference = Firestore.instance.collection("society").document("sunshine").collection("visitor").document("${phonecontroller.text.toString()}");
@@ -29,16 +27,11 @@ class _DetailState extends State<Detail> {
     }).whenComplete((){
       // print(name); 
       vname=name;
-      found=true;
-      load=false;
-      // print(load);
       setState(() {});
       return true;
     });
     if(name==null){
-      // print("number not found");
       return false;
-
     }
   }
 
@@ -100,24 +93,20 @@ class _DetailState extends State<Detail> {
     else if(c==2){
       _img = await ImagePicker.pickImage(source: ImageSource.camera);
     }
-  
-    if(_img!=null){      
-      img=_img;
-      print("image adder called");
+    img=_img;
+    imageadder(s);
+
+    
+    if(img!=null){
       imageadder(s);
     }
 
   }
   String location;
   void imageadder(String s) async{
-    String phoneno = phonecontroller.text.toString();
+    String path = phonecontroller.text.toString();
     var ref=FirebaseStorage.instance.ref();
-    print("${img.path} $phoneno");
-    ref.child("${phoneno}.jpg").putFile(img);
-    if(ref.child("${phoneno}.jpg").putFile(img).isComplete){
-      print("success");
-    }
-    
+    ref.child("$path.jpg").putFile(img);
     // location = await ref.getDownloadURL();
     // print(location);
     setState(() {});
@@ -127,24 +116,12 @@ class _DetailState extends State<Detail> {
     void initState() {
       // TODO: implement initState
       super.initState();
-      phonecontroller.clear();
       const oneSec = const Duration(seconds:4);
       new Timer.periodic(oneSec, (Timer t){
         if(phone_check()==true){
-          load = true;
-          setState(() {});
-          phone_exist_check();
-          // print(load);
-          // if(phone_exist_check()==true){
-          //   print("number found");
-          //   t.cancel();
-          // }
-          // if(found==true){
-          //   phonecontroller.addListener((){
-          //     print("listner call");
-              
-          //   });
-          // }
+          if(phone_exist_check()){
+            t.cancel();
+          }
         }
       });
     }
@@ -163,25 +140,20 @@ class _DetailState extends State<Detail> {
            keyboardType: TextInputType.number,
            decoration: InputDecoration(
            labelText: "Phone Number",
-            hintText: "Enter 10 digit phone number",             
+            hintText: "Enter 10 digit phone number"             
             ),
-            // onEditingComplete: (){
-            //   print("edit complete");
-            // },
-            onChanged: (String s){
-              print("text changed");
-              if(found==true){
-                found=false;
-              }
-            }, 
+        //     onEditingComplete: (){
+        //       if(phone_check()==true){
+        //   if(phone_exist_check()){
+        //     print("working");
+        //   }
+        // } else{
+        //   print("please enter valide phone number");
+        // }
+        //     }, 
             maxLength: 10,
             controller: phonecontroller,
           ),
-          (load==true&&found==false) ? 
-          new Padding(
-            padding: EdgeInsets.only(top: 10.0),
-            child: LinearProgressIndicator(),
-          ) : new Container(),
           new Padding(
             padding: EdgeInsets.only(top: 10.0),
           ),
@@ -190,7 +162,7 @@ class _DetailState extends State<Detail> {
               child: new Column(
                 children: <Widget>[
                   Text("$vname",style: TextStyle(color: Colors.white,fontSize: 20.0),),
-                  Text("Tap to Allow/ अनुमति दे",style: TextStyle(color: Colors.white,fontSize: 20.0))
+                  Text("Tap to Allow",style: TextStyle(color: Colors.white,fontSize: 20.0))
                 ],
               ),
               padding: EdgeInsets.all(10.0),
@@ -202,22 +174,63 @@ class _DetailState extends State<Detail> {
                 key: formKey,
                 child: new Column(
                 children: <Widget>[
-              new IconButton(
-              padding: EdgeInsets.only(right: 45.0),
-              icon: Icon(Icons.photo_camera,size: 100.0,),
-              onPressed: (){
-                picker(2, "photo");
-              },
-              ),
+              // new IconButton(
+              // padding: EdgeInsets.only(right: 45.0),
+              // icon: Icon(Icons.photo_camera,size: 100.0,),
+              // onPressed: (){
+              //   picker(1, "kyc");
+              // },
+              // ),
+              new RaisedButton(
+                  child: new Text("Add Photo",style: new TextStyle(color: Colors.white , fontSize: 15.0),),
+                  color: Colors.blueAccent,
+                  splashColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical( top: Radius.circular(3.0) , bottom: Radius.circular(3.0)) , side: BorderSide(color: Colors.black)),
+                  onPressed: (){
+                    showDialog(context: context,builder: (BuildContext context){
+                  return new AlertDialog(
+                    title: new Text("Add Photo"),
+                    actions: <Widget>[
+                      new RaisedButton(
+                        onPressed: (){
+                          picker(2, "kyc");
+                           Navigator.of(context).pop();
+                          // setState(() {});
+                                                   
+                        },
+                        child: new Text("Camera"),
+                      ),
+                      new RaisedButton(
+                        onPressed: (){
+                          picker(1, "kyc");
+                          // setState(() {});
+                          Navigator.of(context).pop();
+                        },
+                        child: new Text("Gallery"),
+                      ),
+                      new RaisedButton(
+                        onPressed: (){
+                          
+                          setState(() {});
+                          Navigator.of(context).pop();
+                          
+                        },
+                        child: new Text("Cancel"),
+                      ),
+                    ],
+                  );
+                });
+                  }, 
+                ),
               new Padding(
                   padding: const EdgeInsets.only(top: 40.0),
                 ),
               new TextFormField(
                 decoration: new InputDecoration(
                   hintText: "eg. F0212",
-                  labelText: "House number/ घर का नंबर"
+                  labelText: "House number"
                 ),
-                validator: (value) => value.isEmpty ? 'Please Enter House number' : null,
+                validator: (value) => value.isEmpty ? 'Please Enter age' : null,
                 onSaved: (value) => _housenumber=value,
               ),
               new Padding(
@@ -226,7 +239,7 @@ class _DetailState extends State<Detail> {
                 new TextFormField(
                 decoration: new InputDecoration(
                   hintText: "Enter name",
-                  labelText: "Name / नाम"
+                  labelText: "Name"
                 ),
                 validator: (value) => value.isEmpty ? 'Please Enter name' : null,
                 onSaved: (value) => _name=value,
@@ -237,16 +250,16 @@ class _DetailState extends State<Detail> {
                 new TextFormField(
                 decoration: new InputDecoration(
                   hintText: "Enter Purpose of visit",
-                  labelText: "purpose / उद्देश्य"
+                  labelText: "purpose"
                 ),
                 validator: (value) => value.isEmpty ? 'Please Enter purpose' : null,
-                onSaved: (value) => _purpose=value,
+                onSaved: (value) => _name=value,
               ),
               new Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                 ),
               new MaterialButton(
-                  child: Text("Tap to Allow/ अनुमति दे",style: TextStyle(color: Colors.white,fontSize: 20.0)),
+                  child: Text("Tap to Allow",style: TextStyle(color: Colors.white,fontSize: 20.0)),
                   onPressed: (){
                     submit();
                   },
