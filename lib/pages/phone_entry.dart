@@ -32,11 +32,13 @@ class _DetailState extends State<Detail> {
       found=true;
       load=false;
       // print(load);
+      if(name==null){found=false;}
       setState(() {});
       return true;
     });
     if(name==null){
       // print("number not found");
+      found=false;
       return false;
 
     }
@@ -128,25 +130,25 @@ class _DetailState extends State<Detail> {
       // TODO: implement initState
       super.initState();
       phonecontroller.clear();
-      const oneSec = const Duration(seconds:4);
-      new Timer.periodic(oneSec, (Timer t){
-        if(phone_check()==true){
-          load = true;
-          setState(() {});
-          phone_exist_check();
-          // print(load);
-          // if(phone_exist_check()==true){
-          //   print("number found");
-          //   t.cancel();
-          // }
-          // if(found==true){
-          //   phonecontroller.addListener((){
-          //     print("listner call");
+      // const oneSec = const Duration(seconds:4);
+      // new Timer.periodic(oneSec, (Timer t){
+      //   if(phone_check()==true){
+      //     load = true;
+      //     setState(() {});
+      //     phone_exist_check();
+      //     // print(load);
+      //     // if(phone_exist_check()==true){
+      //     //   print("number found");
+      //     //   t.cancel();
+      //     // }
+      //     // if(found==true){
+      //     //   phonecontroller.addListener((){
+      //     //     print("listner call");
               
-          //   });
-          // }
-        }
-      });
+      //     //   });
+      //     // }
+      //   }
+      // });
     }
 
   @override
@@ -170,9 +172,14 @@ class _DetailState extends State<Detail> {
             // },
             onChanged: (String s){
               print("text changed");
-              if(found==true){
-                found=false;
+              if(phone_check()==true){
+                load=true;
+                setState(() {});
+                phone_exist_check();
               }
+              // if(found==true){
+              //   found=false;
+              // }
             }, 
             maxLength: 10,
             controller: phonecontroller,
