@@ -5,12 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Detail extends StatefulWidget {
   @override
   _DetailState createState() => _DetailState();
 }
-
+FirebaseAuth auth = FirebaseAuth.instance;
 var phonecontroller = new TextEditingController();
 String vname;
 class _DetailState extends State<Detail> {
@@ -19,6 +20,17 @@ class _DetailState extends State<Detail> {
   bool load = false ;
   bool found=false ;
   DocumentReference documentReference ;
+  
+  Future<FirebaseUser> _ensureLoggedIn() async{
+  FirebaseUser user = await auth.signInWithEmailAndPassword(
+                email:    "9992306105@123.com",
+                password: "e3539d",
+
+  );
+  print("login success");
+  return user;
+}
+  
   bool phone_exist_check(){
     documentReference = Firestore.instance.collection("society").document("sunshine").collection("visitor").document("${phonecontroller.text.toString()}");
     String name;
@@ -130,6 +142,8 @@ class _DetailState extends State<Detail> {
       // TODO: implement initState
       super.initState();
       phonecontroller.clear();
+      _ensureLoggedIn();
+      print("done");
       // const oneSec = const Duration(seconds:4);
       // new Timer.periodic(oneSec, (Timer t){
       //   if(phone_check()==true){
@@ -213,7 +227,7 @@ class _DetailState extends State<Detail> {
               padding: EdgeInsets.only(right: 45.0),
               icon: Icon(Icons.photo_camera,size: 100.0,),
               onPressed: (){
-                picker(2, "photo");
+                picker(1, "photo");
               },
               ),
               new Padding(
