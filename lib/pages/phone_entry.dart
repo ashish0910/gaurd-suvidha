@@ -16,7 +16,8 @@ var phonecontroller = new TextEditingController();
 String vname;
 class _DetailState extends State<Detail> {
   final formKey = new GlobalKey<FormState>();
-  String _name,_housenumber,_purpose,_error;
+  String _name,_housenumber,_purpose,_error,download;
+  String image_process = "Please add image" ;
   bool load = false ;
   bool found=false ;
   DocumentReference documentReference ;
@@ -31,12 +32,17 @@ class _DetailState extends State<Detail> {
   return user;
 }
   
+  var housenumber,purpose,downloadurl;
+
   bool phone_exist_check(){
     documentReference = Firestore.instance.collection("society").document("sunshine").collection("visitor").document("${phonecontroller.text.toString()}");
     String name;
     documentReference.get().then((snapshot){
       if(snapshot.exists){
         name=snapshot['name'];
+        housenumber=snapshot['housenumber'];
+        purpose=snapshot['purpose'];
+        downloadurl=snapshot['downloadurl'];
       }
     }).whenComplete((){
       // print(name); 
@@ -76,6 +82,23 @@ class _DetailState extends State<Detail> {
     }
   }
 
+  void _update() async{
+    DateTime dateTime = DateTime.now();
+    Map<String,dynamic> data = <String,dynamic> {
+      "name" : vname,
+      "housenumber" : housenumber,
+      "purpose" : purpose,
+      "mobile" : phonecontroller.text.toString(),
+      "time" : dateTime,
+      "downloadurl" : downloadurl,
+    };
+    documentReference = Firestore.instance.collection("society").document("sunshine").collection("visitor").document("${phonecontroller.text.toString()}");
+    documentReference.updateData(data).whenComplete((){
+      print("Document updated $housenumber");
+      Navigator.of(context).pop();
+    });
+  }
+
   void submit() async{
     DateTime dateTime = DateTime.now();
     if(_validate()){
@@ -86,7 +109,8 @@ class _DetailState extends State<Detail> {
           "housenumber" : _housenumber,
           "purpose" : _purpose,
           "mobile" : phonecontroller.text.toString(),
-          "time" : dateTime
+          "time" : dateTime,
+          "downloadurl" : download
         };
         documentReference = Firestore.instance.collection("society").document("sunshine").collection("visitor").document("${phonecontroller.text.toString()}");
         documentReference.setData(data).whenComplete((){
@@ -122,15 +146,24 @@ class _DetailState extends State<Detail> {
     }
 
   }
+  void down() async{
+    download = await FirebaseStorage.instance.ref().child("${phoneno}.jpg").getDownloadURL();
+    print(download);
+    image_process="Sucessfully uploaded image";
+    setState(() {});
+  }
   String location;
+  String phoneno = phonecontroller.text.toString();
   void imageadder(String s) async{
-    String phoneno = phonecontroller.text.toString();
+    image_process = "Uploading image please wait" ;
+    setState(() {});
     var ref=FirebaseStorage.instance.ref();
     print("${img.path} $phoneno");
-    ref.child("${phoneno}.jpg").putFile(img);
-    if(ref.child("${phoneno}.jpg").putFile(img).isComplete){
-      print("success");
-    }
+    ref.child("${phoneno}.jpg").putFile(img).onComplete.then((onValue){
+      down();
+    });
+    
+    // download = await ref.child("${phoneno}.jpg").getDownloadURL();
     
     // location = await ref.getDownloadURL();
     // print(location);
@@ -142,7 +175,7 @@ class _DetailState extends State<Detail> {
       // TODO: implement initState
       super.initState();
       phonecontroller.clear();
-      _ensureLoggedIn();
+      // _ensureLoggedIn();
       print("done");
       // const oneSec = const Duration(seconds:4);
       // new Timer.periodic(oneSec, (Timer t){
@@ -188,6 +221,7 @@ class _DetailState extends State<Detail> {
               print("text changed");
               if(phone_check()==true){
                 load=true;
+                image_process = "Please add image";
                 setState(() {});
                 phone_exist_check();
               }
@@ -216,7 +250,9 @@ class _DetailState extends State<Detail> {
               ),
               padding: EdgeInsets.all(10.0),
               color: new Color(0xFF5424eb),
-              onPressed: (){},
+              onPressed: (){
+                _update();
+              },
             )
           ) : new Container(
             child: Form(
@@ -266,13 +302,18 @@ class _DetailState extends State<Detail> {
               new Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                 ),
-              new MaterialButton(
+              ((image_process=="Uploading image please wait")||(image_process=="Please add image")) ? new Container():
+                new MaterialButton(
                   child: Text("Tap to Allow/ अनुमति दे",style: TextStyle(color: Colors.white,fontSize: 20.0)),
                   onPressed: (){
                     submit();
                   },
                   color: new Color(0xFF5424eb),
+                )  ,
+                new Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
                 ),
+                new Text("$image_process"),
                 ],
               ),
             ),
